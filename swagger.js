@@ -8,7 +8,7 @@ const doc = {
   // host: 'localhost:5000',
   host: 'erp-sales-backend.onrender.com',
   basePath: '/',
-  schemes: ['http']
+  schemes: ['https']
 };
 
 const outputFile = './swagger-output.json';

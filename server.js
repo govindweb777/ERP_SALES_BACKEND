@@ -51,7 +51,7 @@ app.use(cors({
       'http://localhost:5173',
       'https://erp-admin-frontend.vercel.app',
       'https://webseeder-erp-ashen.vercel.app',
-      'http://erp-sales-backend.onrender.com',
+      'https://erp-sales-backend.onrender.com',
     ];
     
     if (!origin || allowedOrigins.includes(origin)) {
