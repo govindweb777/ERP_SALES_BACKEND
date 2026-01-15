@@ -8,7 +8,7 @@
   "host": "erp-sales-backend.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/": {
