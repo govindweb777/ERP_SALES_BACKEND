@@ -15,8 +15,9 @@ const generateTempPassword = (length = 10) => {
 /**
  * Generate reset token
  */
-const generateResetToken = () => {
-  return crypto.randomBytes(32).toString('hex');
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 /**
@@ -115,7 +116,7 @@ const generateVoucherNo = async (Model, prefix, companyId, branchId) => {
 
 module.exports = {
   generateTempPassword,
-  generateResetToken,
+  generateOTP,
   getPagination,
   buildPaginationResponse,
   buildSearchFilter,

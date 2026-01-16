@@ -1,12 +1,12 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
+  host: 'smtp.hostinger.com',
+  port: 465,
+  secure: true, 
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS  
   }
 });
 
@@ -73,64 +73,24 @@ const sendWelcomeEmail = async (email, name, tempPassword, role) => {
 /**
  * Send password reset email
  */
-const sendResetPasswordEmail = async (email, name, resetToken) => {
-  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
-  
+
+const sendResetOtpEmail = async (email, name, otp) => {
   const mailOptions = {
     from: `"SalesERP" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: 'SalesERP - Password Reset Request',
+    subject: 'SalesERP - Password Reset OTP',
     html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: #dc2626; color: white; padding: 20px; text-align: center; }
-          .content { padding: 30px; background: #f9fafb; }
-          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-          .btn { display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; }
-          .token { background: #fff; padding: 15px; border-radius: 8px; font-family: monospace; word-break: break-all; }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Password Reset Request</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${name}</strong>,</p>
-            <p>We received a request to reset your password. Click the button below to reset it:</p>
-            
-            <p style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" class="btn">Reset Password</a>
-            </p>
-            
-            <p>Or use this reset token:</p>
-            <div class="token">${resetToken}</div>
-            
-            <p><strong>Note:</strong> This link will expire in 1 hour.</p>
-            <p>If you didn't request this, please ignore this email.</p>
-          </div>
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} SalesERP. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
-      </html>
+      <p>Hello <b>${name}</b>,</p>
+      <p>Your password reset OTP is:</p>
+      <h2>${otp}</h2>
+      <p>This OTP is valid for 10 minutes.</p>
+      <p>If you did not request this, ignore this email.</p>
     `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`Reset password email sent to ${email}`);
-    return true;
-  } catch (error) {
-    console.error('Error sending reset email:', error);
-    return false;
-  }
+  await transporter.sendMail(mailOptions);
 };
+
 
 /**
  * Send branch creation notification
@@ -191,6 +151,6 @@ const sendBranchCreatedEmail = async (email, name, branchName, adminEmail) => {
 
 module.exports = {
   sendWelcomeEmail,
-  sendResetPasswordEmail,
+  sendResetOtpEmail,
   sendBranchCreatedEmail
 };

@@ -8,11 +8,11 @@ const { validate, branchSchema, userUpdateSchema, userPanelSchema, companySchema
 router.use(authenticate);
 
 // Dashboard
-router.get('/dashboard', authorize('admin', 'user-panel'), adminController.getDashboard);
+// router.get('/dashboard', authorize('admin', 'user-panel'), adminController.getDashboard);
 
 // Company
-router.get('/company', authorize('admin'), adminController.getCompany);
-router.put('/company', authorize('admin'), validate(companySchema), adminController.updateCompany);
+router.get('/company', adminController.getCompany);
+router.put('/company', validate(companySchema), adminController.updateCompany);
 
 // Users
 router.get('/users', authorize('admin', 'branch', 'user-panel'), adminController.getUsers);
@@ -21,7 +21,7 @@ router.post('/users/user-panel', authorize('admin'), validate(userPanelSchema), 
 router.put('/users/:id', authorize('admin', 'branch'), canManageUser, validate(userUpdateSchema), adminController.updateUser);
 router.delete('/users/:id', authorize('admin'), canManageUser, adminController.deleteUser);
 router.patch('/users/:id/toggle-status', authorize('admin', 'branch'), canManageUser, adminController.toggleUserStatus);
-router.post('/users/:id/profile-pic', authorize('admin', 'branch'), adminController.uploadProfilePic);
+// router.post('/users/:id/profile-pic', authorize('admin', 'branch'), adminController.uploadProfilePic);
 
 // Branches
 router.get('/branches', authorize('admin', 'user-panel'), adminController.getBranches);

@@ -61,11 +61,11 @@ const userSchema = new mongoose.Schema({
   profilePic: {
     type: String
   },
-  resetToken: {
+  resetOtp: {
     type: String,
     select: false
   },
-  resetExpiry: {
+  resetOtpExpiry: {
     type: Date,
     select: false
   },

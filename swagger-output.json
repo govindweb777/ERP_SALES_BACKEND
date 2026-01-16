@@ -5,10 +5,10 @@
     "description": "Sales ERP Management System API",
     "version": "1.0.0"
   },
-  "host": "erp-sales-backend.onrender.com",
+  "host": "localhost:5000",
   "basePath": "/",
   "schemes": [
-    "https"
+    "http"
   ],
   "paths": {
     "/": {
@@ -104,29 +104,29 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request"
+          "default": {
+            "description": ""
           }
         }
       }
     },
-    "/api/auth/reset-password/{token}": {
+    "/api/auth/reset-password-otp": {
       "post": {
         "description": "",
         "parameters": [
-          {
-            "name": "token",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
-                "password": {
+                "email": {
+                  "example": "any"
+                },
+                "otp": {
+                  "example": "any"
+                },
+                "newPassword": {
                   "example": "any"
                 }
               }
@@ -134,8 +134,8 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request"
+          "default": {
+            "description": ""
           }
         }
       }
@@ -189,23 +189,6 @@
         }
       }
     },
-    "/api/admin/dashboard": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/admin/company": {
       "get": {
         "description": "",
@@ -229,6 +212,42 @@
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "companyName": {
+                  "example": "any"
+                },
+                "registrationType": {
+                  "example": "any"
+                },
+                "businessType": {
+                  "example": "any"
+                },
+                "gstin": {
+                  "example": "any"
+                },
+                "establishedFrom": {
+                  "example": "any"
+                },
+                "address": {
+                  "example": "any"
+                },
+                "contact": {
+                  "example": "any"
+                },
+                "logo": {
+                  "example": "any"
+                },
+                "isActive": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -402,29 +421,6 @@
     },
     "/api/admin/users/{id}/toggle-status": {
       "patch": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/admin/users/{id}/profile-pic": {
-      "post": {
         "description": "",
         "parameters": [
           {

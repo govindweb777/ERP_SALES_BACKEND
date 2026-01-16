@@ -5,10 +5,11 @@ const doc = {
     title: 'SalesERP API',
     description: 'Sales ERP Management System API'
   },
-  // host: 'localhost:5000',
-  host: 'erp-sales-backend.onrender.com',
+  host: 'localhost:5000',
+  // host: 'erp-sales-backend.onrender.com',
   basePath: '/',
-  schemes: ['https']
+  schemes: ['http']
+  // schemes: ['https']
 };
 
 const outputFile = './swagger-output.json';

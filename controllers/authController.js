@@ -3,8 +3,8 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const Company = require('../models/Company');
 const { successResponse, errorResponse } = require('../utils/response');
-const { sendWelcomeEmail, sendResetPasswordEmail } = require('../utils/email');
-const { generateTempPassword, generateResetToken } = require('../utils/helpers');
+const { sendWelcomeEmail, sendResetOtpEmail } = require('../utils/email');
+const { generateTempPassword, generateOTP } = require('../utils/helpers');
 
 // Login
 exports.login = async (req, res) => {
@@ -41,17 +41,52 @@ exports.register = async (req, res) => {
   }
 };
 
-// Forgot Password
 exports.forgotPassword = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) return successResponse(res, null, 'If email exists, reset link sent');
-    const resetToken = generateResetToken();
-    user.resetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    user.resetExpiry = Date.now() + 3600000;
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return successResponse(res, null, 'If email exists, OTP sent');
+    }
+
+    const otp = generateOTP(); // 6 digit
+
+    // 🔥 STORE PLAIN OTP
+    user.resetOtp = otp;
+    user.resetOtpExpiry = Date.now() + 10 * 60 * 1000; // 10 min
+
     await user.save({ validateBeforeSave: false });
-    await sendResetPasswordEmail(user.email, user.name, resetToken);
-    successResponse(res, null, 'Reset email sent');
+
+    await sendResetOtpEmail(user.email, user.name, otp);
+
+    successResponse(res, null, 'OTP sent to email');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+};
+
+exports.resetPasswordWithOtp = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({
+      email,
+      resetOtp: otp, // 🔥 direct match
+      resetOtpExpiry: { $gt: Date.now() }
+    }).select('+resetOtp +resetOtpExpiry');
+
+    if (!user) {
+      return errorResponse(res, 'Invalid or expired OTP', 400);
+    }
+
+    user.password = newPassword;
+    user.resetOtp = undefined;
+    user.resetOtpExpiry = undefined;
+
+    await user.save();
+
+    successResponse(res, null, 'Password reset successful');
   } catch (error) {
     errorResponse(res, error.message, 500);
   }

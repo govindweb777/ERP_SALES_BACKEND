@@ -340,14 +340,52 @@ exports.getCompany = async (req, res) => {
   } catch (error) { errorResponse(res, error.message, 500); }
 };
 
+// exports.updateCompany = async (req, res) => {
+//   try {
+//     const company = await Company.findByIdAndUpdate(
+//       req.user.companyId,
+//       req.body,
+//       { new: true, runValidators: true }
+//     );
+//     if (!company) return errorResponse(res, 'Company not found', 404);
+//     successResponse(res, { company });
+//   } catch (error) { errorResponse(res, error.message, 500); }
+// };
+
 exports.updateCompany = async (req, res) => {
   try {
+    const {
+      companyName,
+      registrationType,
+      businessType,
+      gstin,
+      establishedFrom,
+      address,
+      contact,
+      logo,
+      isActive
+    } = req.body;
+
     const company = await Company.findByIdAndUpdate(
       req.user.companyId,
-      req.body,
+      {
+        companyName,
+        registrationType,
+        businessType,
+        gstin,
+        establishedFrom,
+        address,
+        contact,
+        logo,
+        isActive
+      },
       { new: true, runValidators: true }
     );
+
     if (!company) return errorResponse(res, 'Company not found', 404);
     successResponse(res, { company });
-  } catch (error) { errorResponse(res, error.message, 500); }
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
 };
+

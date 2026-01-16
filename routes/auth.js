@@ -7,8 +7,8 @@ const { validate, loginSchema, registerSchema, forgotPasswordSchema, resetPasswo
 
 router.post('/login', validate(loginSchema), authController.login);
 router.post('/register', authenticate, authorize('admin', 'branch'), validate(registerSchema), authController.register);
-router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
-router.post('/reset-password/:token', validate(resetPasswordSchema), authController.resetPassword);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password-otp', authController.resetPasswordWithOtp);
 router.post('/change-password', authenticate, validate(changePasswordSchema), authController.changePassword);
 router.get('/profile', authenticate, authController.getProfile);
 
