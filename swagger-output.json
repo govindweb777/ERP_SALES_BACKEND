@@ -5,10 +5,10 @@
     "description": "Sales ERP Management System API",
     "version": "1.0.0"
   },
-  "host": "localhost:5000",
+  "host": "erp-sales-backend.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "paths": {
     "/": {
