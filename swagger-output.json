@@ -442,6 +442,29 @@
         }
       }
     },
+    "/api/admin/users/{id}/profile-pic": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/admin/branches": {
       "get": {
         "description": "",
@@ -522,6 +545,29 @@
         "responses": {
           "400": {
             "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/admin/branchbyId/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
           }
         }
       }

@@ -15,10 +15,9 @@ const swaggerDocument = require('./swagger-output.json');
 // Import routes
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+// const chartOfAccountRoutes = require('./routes/chartOfAccounts');
 // const accountGroupRoutes = require('./routes/accountGroups');
 // const bankAccountRoutes = require('./routes/bankAccounts');
-// const itemGroupRoutes = require('./routes/itemGroups');
-// const itemCategoryRoutes = require('./routes/itemCategories');
 // const itemRoutes = require('./routes/items');
 // const salesRoutes = require('./routes/sales');
 // const purchaseRoutes = require('./routes/purchases');
@@ -28,6 +27,10 @@ const adminRoutes = require('./routes/admin');
 // const contraEntryRoutes = require('./routes/contraEntries');
 // const journalVoucherRoutes = require('./routes/journalVouchers');
 // const reportRoutes = require('./routes/reports');
+
+
+// const itemGroupRoutes = require('./routes/itemGroups');
+// const itemCategoryRoutes = require('./routes/itemCategories');
 
 const app = express();
 const server = http.createServer(app);
@@ -88,10 +91,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+// app.use('/api/chart-of-accounts', chartOfAccountRoutes);
 // app.use('/api/account-groups', accountGroupRoutes);
 // app.use('/api/bank-accounts', bankAccountRoutes);
-// app.use('/api/item-groups', itemGroupRoutes);
-// app.use('/api/item-categories', itemCategoryRoutes);
 // app.use('/api/items', itemRoutes);
 // app.use('/api/sales', salesRoutes);
 // app.use('/api/purchases', purchaseRoutes);
@@ -101,6 +103,10 @@ app.use('/api/admin', adminRoutes);
 // app.use('/api/contra-entries', contraEntryRoutes);
 // app.use('/api/journal-vouchers', journalVoucherRoutes);
 // app.use('/api/reports', reportRoutes);
+
+
+// app.use('/api/item-groups', itemGroupRoutes);
+// app.use('/api/item-categories', itemCategoryRoutes);
 
 // Health check
 app.get('/', (req, res) => {

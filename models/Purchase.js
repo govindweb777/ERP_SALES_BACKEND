@@ -1,8 +1,22 @@
 const mongoose = require('mongoose');
 
 const purchaseItemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  qty: { type: Number, required: true, min: 0 },
+  itemId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Item',
+    required: true 
+  },
+  itemCode: { type: String, required: true },
+  itemName: { type: String, required: true },
+  propertyType: { type: String },
+  projectName: { type: String },
+  area: {
+    plotArea: { type: Number },
+    builtUpArea: { type: Number },
+    carpetArea: { type: Number },
+    unit: { type: String }
+  },
+  qty: { type: Number, required: true, min: 1, default: 1 },
   rate: { type: Number, required: true, min: 0 },
   amount: { type: Number, required: true, min: 0 }
 }, { _id: false });
@@ -13,6 +27,11 @@ const purchaseSchema = new mongoose.Schema({
     required: [true, 'Vendor name is required'],
     trim: true,
     maxlength: 200
+  },
+  vendorContact: {
+    phone: { type: String },
+    email: { type: String },
+    address: { type: String }
   },
   purchaseNo: {
     type: String,
@@ -48,6 +67,21 @@ const purchaseSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  cgst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  sgst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  igst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   tax: {
     type: Number,
     default: 0,
@@ -62,6 +96,30 @@ const purchaseSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 0
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Partial', 'Paid'],
+    default: 'Pending'
+  },
+  amountPaid: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  balanceAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  paymentMode: {
+    type: String,
+    enum: ['Cash', 'Bank', 'Cheque', 'UPI', 'Card'],
+    default: 'Cash'
+  },
+  notes: {
+    type: String,
+    maxlength: 1000
   },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -92,5 +150,14 @@ purchaseSchema.index({ date: -1 });
 purchaseSchema.index({ vendorName: 'text', purchaseNo: 'text' });
 purchaseSchema.index({ createdBy: 1 });
 purchaseSchema.index({ isActive: 1 });
+purchaseSchema.index({ paymentStatus: 1 });
+purchaseSchema.index({ 'items.itemId': 1 });
+
+// Auto-generate purchase number
+purchaseSchema.statics.generatePurchaseNo = async function(companyId, branchId) {
+  const prefix = 'PUR';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+};
 
 module.exports = mongoose.model('Purchase', purchaseSchema);

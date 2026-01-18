@@ -1,8 +1,22 @@
 const mongoose = require('mongoose');
 
 const salesItemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  qty: { type: Number, required: true, min: 0 },
+  itemId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Item',
+    required: true 
+  },
+  itemCode: { type: String, required: true },
+  itemName: { type: String, required: true },
+  propertyType: { type: String },
+  projectName: { type: String },
+  area: {
+    plotArea: { type: Number },
+    builtUpArea: { type: Number },
+    carpetArea: { type: Number },
+    unit: { type: String }
+  },
+  qty: { type: Number, required: true, min: 1, default: 1 },
   rate: { type: Number, required: true, min: 0 },
   amount: { type: Number, required: true, min: 0 }
 }, { _id: false });
@@ -13,6 +27,11 @@ const salesSchema = new mongoose.Schema({
     required: [true, 'Customer name is required'],
     trim: true,
     maxlength: 200
+  },
+  customerContact: {
+    phone: { type: String },
+    email: { type: String },
+    address: { type: String }
   },
   invoiceNo: {
     type: String,
@@ -38,6 +57,21 @@ const salesSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  cgst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  sgst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  igst: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
   tax: {
     type: Number,
     default: 0,
@@ -52,6 +86,30 @@ const salesSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: 0
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['Pending', 'Partial', 'Paid'],
+    default: 'Pending'
+  },
+  amountPaid: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  balanceAmount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  paymentMode: {
+    type: String,
+    enum: ['Cash', 'Bank', 'Cheque', 'UPI', 'Card', 'EMI'],
+    default: 'Cash'
+  },
+  notes: {
+    type: String,
+    maxlength: 1000
   },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -82,5 +140,14 @@ salesSchema.index({ date: -1 });
 salesSchema.index({ customerName: 'text', invoiceNo: 'text' });
 salesSchema.index({ createdBy: 1 });
 salesSchema.index({ isActive: 1 });
+salesSchema.index({ paymentStatus: 1 });
+salesSchema.index({ 'items.itemId': 1 });
+
+// Auto-generate invoice number
+salesSchema.statics.generateInvoiceNo = async function(companyId, branchId) {
+  const prefix = 'INV';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+};
 
 module.exports = mongoose.model('Sales', salesSchema);

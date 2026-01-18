@@ -184,6 +184,24 @@ exports.getBranches = async (req, res) => {
   } catch (error) { errorResponse(res, error.message, 500); }
 };
 
+exports.getBranchById = async (req, res) => {
+  try {
+    const branch = await Branch.findOne({
+      _id: req.params.id,
+      companyId: req.user.companyId
+    });
+
+    if (!branch) {
+      return errorResponse(res, 'Branch not found', 404);
+    }
+
+    successResponse(res, { branch });
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+};
+
+
 exports.createBranch = async (req, res) => {
   try {
     const { 
@@ -339,18 +357,6 @@ exports.getCompany = async (req, res) => {
     successResponse(res, { company });
   } catch (error) { errorResponse(res, error.message, 500); }
 };
-
-// exports.updateCompany = async (req, res) => {
-//   try {
-//     const company = await Company.findByIdAndUpdate(
-//       req.user.companyId,
-//       req.body,
-//       { new: true, runValidators: true }
-//     );
-//     if (!company) return errorResponse(res, 'Company not found', 404);
-//     successResponse(res, { company });
-//   } catch (error) { errorResponse(res, error.message, 500); }
-// };
 
 exports.updateCompany = async (req, res) => {
   try {

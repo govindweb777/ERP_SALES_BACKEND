@@ -21,10 +21,12 @@ router.post('/users/user-panel', authorize('admin'), validate(userPanelSchema), 
 router.put('/users/:id', authorize('admin', 'branch'), canManageUser, validate(userUpdateSchema), adminController.updateUser);
 router.delete('/users/:id', authorize('admin'), canManageUser, adminController.deleteUser);
 router.patch('/users/:id/toggle-status', authorize('admin', 'branch'), canManageUser, adminController.toggleUserStatus);
-// router.post('/users/:id/profile-pic', authorize('admin', 'branch'), adminController.uploadProfilePic);
+router.post('/users/:id/profile-pic', authorize('admin', 'branch'), adminController.uploadProfilePic);
 
 // Branches
 router.get('/branches', authorize('admin', 'user-panel'), adminController.getBranches);
+
+router.get('/branchbyId/:id', authorize('admin', 'user-panel'), adminController.getBranchById);
 router.get('/branches/deleted', authorize('admin'), adminController.getDeletedBranches);
 router.post('/branches', authorize('admin'), validate(branchSchema), adminController.createBranch);
 router.put('/branches/:id', authorize('admin'), validate(branchSchema), adminController.updateBranch);

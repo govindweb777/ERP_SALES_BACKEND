@@ -3,6 +3,32 @@ const crypto = require('crypto');
 /**
  * Generate random temporary password
  */
+const getCompanyBranchFilter = (user) => {
+  const filter = {};
+  
+  if (user.companyId) {
+    filter.companyId = user.companyId;
+  }
+  
+  // Branch users can only see their own branch data
+  if (user.role === 'branch' || user.role === 'user' || user.role === 'user-panel') {
+    if (user.branchId) {
+      filter.branchId = user.branchId;
+    }
+  }
+  
+  return filter;
+};
+
+const getPaginationParams = (query) => {
+  const page = parseInt(query.page) || 1;
+  const limit = parseInt(query.limit) || 10;
+  const skip = (page - 1) * limit;
+  
+  return { page, limit, skip };
+};
+
+
 const generateTempPassword = (length = 10) => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
   let password = '';
@@ -115,6 +141,8 @@ const generateVoucherNo = async (Model, prefix, companyId, branchId) => {
 };
 
 module.exports = {
+  getCompanyBranchFilter,
+  getPaginationParams,
   generateTempPassword,
   generateOTP,
   getPagination,
