@@ -7,7 +7,7 @@ const controller = require('../controllers/bankAccountController');
 router.use(authenticate);
 
 // Get next number
-// router.get('/next-number', authorize('admin', 'branch', 'user', 'user-panel'), controller.getNextNumber);
+router.get('/next-number', authorize('admin', 'branch', 'user', 'user-panel'), controller.getNextNumber);
 
 // Get deleted
 router.get('/deleted', authorize('admin', 'branch'), controller.getDeleted);

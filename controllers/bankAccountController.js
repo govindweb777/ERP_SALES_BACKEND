@@ -284,3 +284,27 @@ exports.restore = async (req, res) => {
     return errorResponse(res, error.message, 500);
   }
 };
+
+exports.getNextNumber = async (req, res) => {
+  try {
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: false };
+    
+    const lastAccount = await BankAccount.findOne(filter)
+      .sort({ createdAt: -1 })
+      .select('accountNumber');
+    
+    let nextNumber = 'BA0001';
+    
+    if (lastAccount && lastAccount.accountNumber) {
+      const match = lastAccount.accountNumber.match(/BA(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10) + 1;
+        nextNumber = `BA${num.toString().padStart(4, '0')}`;
+      }
+    }
+    
+    return successResponse(res, { nextNumber });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
