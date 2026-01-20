@@ -116,21 +116,6 @@ exports.createUserPanel = async (req, res) => {
   } catch (error) { errorResponse(res, error.message, 500); }
 };
 
-// exports.updateUser = async (req, res) => {
-//   try {
-//     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-//     if (!user) return errorResponse(res, 'User not found', 404);
-    
-//     // Emit socket notification
-//     sendNotification(req.user.companyId, user.branchId, NotificationTypes.USER_UPDATED, {
-//       message: `User "${user.name}" updated`,
-//       user: { _id: user._id, name: user.name, email: user.email },
-//       updatedBy: req.user.name
-//     });
-    
-//     successResponse(res, { user });
-//   } catch (error) { errorResponse(res, error.message, 500); }
-// };
 
 exports.updateUser = async (req, res) => {
   try {
@@ -153,9 +138,22 @@ exports.updateUser = async (req, res) => {
       isActive
     };
 
-    // Only allow moduleAccess update for user-panel
-    if (role === 'user-panel' && moduleAccess) {
-      updatePayload.moduleAccess = moduleAccess;
+    // 🔥 Fetch existing user FIRST
+    const existingUser = await User.findOne({
+      _id: req.params.id,
+      companyId: req.user.companyId
+    });
+
+    if (!existingUser) {
+      return errorResponse(res, 'User not found', 404);
+    }
+
+    // ✅ Allow moduleAccess update IF existing role is user-panel
+    if (existingUser.role === 'user-panel' && moduleAccess) {
+      updatePayload.moduleAccess = {
+        ...existingUser.moduleAccess, // keep previous values
+        ...moduleAccess               // override updated ones
+      };
     }
 
     // Remove undefined values
@@ -163,13 +161,11 @@ exports.updateUser = async (req, res) => {
       key => updatePayload[key] === undefined && delete updatePayload[key]
     );
 
-    const user = await User.findOneAndUpdate(
-      { _id: req.params.id, companyId: req.user.companyId },
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
       updatePayload,
       { new: true, runValidators: true }
     );
-
-    if (!user) return errorResponse(res, 'User not found', 404);
 
     sendNotification(req.user.companyId, user.branchId, NotificationTypes.USER_UPDATED, {
       message: `User "${user.name}" updated`,
@@ -182,6 +178,7 @@ exports.updateUser = async (req, res) => {
     errorResponse(res, error.message, 500);
   }
 };
+
 
 exports.deleteUser = async (req, res) => {
   try {
