@@ -116,20 +116,71 @@ exports.createUserPanel = async (req, res) => {
   } catch (error) { errorResponse(res, error.message, 500); }
 };
 
+// exports.updateUser = async (req, res) => {
+//   try {
+//     const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+//     if (!user) return errorResponse(res, 'User not found', 404);
+    
+//     // Emit socket notification
+//     sendNotification(req.user.companyId, user.branchId, NotificationTypes.USER_UPDATED, {
+//       message: `User "${user.name}" updated`,
+//       user: { _id: user._id, name: user.name, email: user.email },
+//       updatedBy: req.user.name
+//     });
+    
+//     successResponse(res, { user });
+//   } catch (error) { errorResponse(res, error.message, 500); }
+// };
+
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const {
+      name,
+      email,
+      phoneNumber,
+      role,
+      branchId,
+      moduleAccess,
+      isActive
+    } = req.body;
+
+    const updatePayload = {
+      name,
+      email,
+      phoneNumber,
+      role,
+      branchId,
+      isActive
+    };
+
+    // Only allow moduleAccess update for user-panel
+    if (role === 'user-panel' && moduleAccess) {
+      updatePayload.moduleAccess = moduleAccess;
+    }
+
+    // Remove undefined values
+    Object.keys(updatePayload).forEach(
+      key => updatePayload[key] === undefined && delete updatePayload[key]
+    );
+
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id, companyId: req.user.companyId },
+      updatePayload,
+      { new: true, runValidators: true }
+    );
+
     if (!user) return errorResponse(res, 'User not found', 404);
-    
-    // Emit socket notification
+
     sendNotification(req.user.companyId, user.branchId, NotificationTypes.USER_UPDATED, {
       message: `User "${user.name}" updated`,
       user: { _id: user._id, name: user.name, email: user.email },
       updatedBy: req.user.name
     });
-    
-    successResponse(res, { user });
-  } catch (error) { errorResponse(res, error.message, 500); }
+
+    successResponse(res, { user }, 'User updated successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
 };
 
 exports.deleteUser = async (req, res) => {
