@@ -71,7 +71,7 @@ exports.createUser = async (req, res) => {
     }
     
     const user = await User.create(userData);
-    await sendWelcomeEmail(email, name, tempPassword, role);
+    // await sendWelcomeEmail(email, name, tempPassword, role);
     
     // Update branch user count if branchId provided
     if (branchId) {
@@ -79,11 +79,11 @@ exports.createUser = async (req, res) => {
     }
     
     // Emit socket notification
-    sendNotification(req.user.companyId, branchId, NotificationTypes.USER_CREATED, {
-      message: `New user "${name}" created`,
-      user: { _id: user._id, name, email, role },
-      createdBy: req.user.name
-    });
+    // sendNotification(req.user.companyId, branchId, NotificationTypes.USER_CREATED, {
+    //   message: `New user "${name}" created`,
+    //   user: { _id: user._id, name, email, role },
+    //   createdBy: req.user.name
+    // });
     
     successResponse(res, { user }, 'User created', 201);
   } catch (error) { errorResponse(res, error.message, 500); }
