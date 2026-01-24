@@ -189,6 +189,23 @@
         }
       }
     },
+    "/api/admin/dashboard": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/admin/company": {
       "get": {
         "description": "",
@@ -320,6 +337,9 @@
                 "moduleAccess": {
                   "example": "any"
                 },
+                "userModuleAccess": {
+                  "example": "any"
+                },
                 "password": {
                   "example": "any"
                 }
@@ -412,6 +432,9 @@
                   "example": "any"
                 },
                 "moduleAccess": {
+                  "example": "any"
+                },
+                "userModuleAccess": {
                   "example": "any"
                 },
                 "isActive": {

@@ -45,6 +45,18 @@ const userSchema = new mongoose.Schema({
     isReports: { type: Boolean, default: false },
     isSettings: { type: Boolean, default: false }
   },
+  // Module access for user role (granular permissions)
+  userModuleAccess: {
+    isAccountMaster: { type: Boolean, default: false },
+    isItemMaster: { type: Boolean, default: false },
+    isSales: { type: Boolean, default: false },
+    isPurchase: { type: Boolean, default: false },
+    isExpenses: { type: Boolean, default: false },
+    isReceipt: { type: Boolean, default: false },
+    isPayment: { type: Boolean, default: false },
+    isContraEntry: { type: Boolean, default: false },
+    isJournalVoucher: { type: Boolean, default: false }
+  },
   branchId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Branch'

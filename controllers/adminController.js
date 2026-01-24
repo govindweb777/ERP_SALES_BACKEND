@@ -52,7 +52,7 @@ exports.getUsers = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, role, branchId, phoneNumber, moduleAccess, password } = req.body;
+    const { name, email, role, branchId, phoneNumber, moduleAccess, userModuleAccess, password } = req.body;
     const tempPassword = password || generateTempPassword();
     
     const userData = { 
@@ -70,6 +70,11 @@ exports.createUser = async (req, res) => {
       userData.moduleAccess = moduleAccess;
     }
     
+    // Add user module access for user role
+    if (role === 'user' && userModuleAccess) {
+      userData.userModuleAccess = userModuleAccess;
+    }
+    
     const user = await User.create(userData);
     // await sendWelcomeEmail(email, name, tempPassword, role);
     
@@ -78,14 +83,19 @@ exports.createUser = async (req, res) => {
       await Branch.findByIdAndUpdate(branchId, { $inc: { noOfUsers: 1 } });
     }
     
-    // Emit socket notification
+    // Fetch user with populated company for response
+    const populatedUser = await User.findById(user._id)
+      .populate('branchId', 'branchName branchCode')
+      .populate('companyId', 'companyName registrationType gstin');
+    
+    //Emit socket notification
     // sendNotification(req.user.companyId, branchId, NotificationTypes.USER_CREATED, {
     //   message: `New user "${name}" created`,
     //   user: { _id: user._id, name, email, role },
     //   createdBy: req.user.name
     // });
     
-    successResponse(res, { user }, 'User created', 201);
+    successResponse(res, { user: populatedUser }, 'User created', 201);
   } catch (error) { errorResponse(res, error.message, 500); }
 };
 
@@ -104,13 +114,13 @@ exports.createUserPanel = async (req, res) => {
       companyId: req.user.companyId
     });
     
-    await sendWelcomeEmail(email, name, password, 'user-panel');
+    // await sendWelcomeEmail(email, name, password, 'user-panel');
     
-    sendNotification(req.user.companyId, null, NotificationTypes.USER_CREATED, {
-      message: `New user panel user "${name}" created`,
-      user: { _id: user._id, name, email, role: 'user-panel' },
-      createdBy: req.user.name
-    });
+    // sendNotification(req.user.companyId, null, NotificationTypes.USER_CREATED, {
+    //   message: `New user panel user "${name}" created`,
+    //   user: { _id: user._id, name, email, role: 'user-panel' },
+    //   createdBy: req.user.name
+    // });
     
     successResponse(res, { user }, 'User panel created', 201);
   } catch (error) { errorResponse(res, error.message, 500); }
@@ -126,6 +136,7 @@ exports.updateUser = async (req, res) => {
       role,
       branchId,
       moduleAccess,
+      userModuleAccess,
       isActive
     } = req.body;
 
@@ -155,6 +166,14 @@ exports.updateUser = async (req, res) => {
         ...moduleAccess               // override updated ones
       };
     }
+    
+    // ✅ Allow userModuleAccess update IF existing role is user
+    if (existingUser.role === 'user' && userModuleAccess) {
+      updatePayload.userModuleAccess = {
+        ...existingUser.userModuleAccess, // keep previous values
+        ...userModuleAccess               // override updated ones
+      };
+    }
 
     // Remove undefined values
     Object.keys(updatePayload).forEach(
@@ -165,7 +184,8 @@ exports.updateUser = async (req, res) => {
       req.params.id,
       updatePayload,
       { new: true, runValidators: true }
-    );
+    ).populate('branchId', 'branchName branchCode')
+     .populate('companyId', 'companyName registrationType gstin');
 
     sendNotification(req.user.companyId, user.branchId, NotificationTypes.USER_UPDATED, {
       message: `User "${user.name}" updated`,
