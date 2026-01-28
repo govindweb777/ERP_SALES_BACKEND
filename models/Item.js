@@ -115,11 +115,6 @@ const itemSchema = new mongoose.Schema({
     ref: 'ItemGroup',
     required: true
   },
-  categoryId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ItemCategory',
-    required: true
-  },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
@@ -134,9 +129,12 @@ const itemSchema = new mongoose.Schema({
     caption: String
   }],
   documents: [{
-    name: String,
-    url: String,
-    type: String
+    filename: String,
+    originalName: String,
+    path: String,
+    mimetype: String,
+    size: Number,
+    uploadedAt: { type: Date, default: Date.now }
   }],
   isActive: {
     type: Boolean,
@@ -152,7 +150,6 @@ itemSchema.index({ itemCode: 1, companyId: 1, branchId: 1 }, { unique: true });
 itemSchema.index({ itemName: 'text', itemCode: 'text', projectName: 'text' });
 itemSchema.index({ hsnCode: 1 });
 itemSchema.index({ groupId: 1 });
-itemSchema.index({ categoryId: 1 });
 itemSchema.index({ isActive: 1 });
 itemSchema.index({ status: 1 });
 itemSchema.index({ propertyType: 1 });

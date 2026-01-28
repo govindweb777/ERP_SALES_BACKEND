@@ -6,6 +6,7 @@ const Item = require('../models/Item');
 const { successResponse, errorResponse, paginatedResponse } = require('../utils/response');
 const { getPagination, buildPaginationResponse, getCompanyBranchFilter } = require('../utils/helpers');
 const { sendNotification, NotificationTypes } = require('../utils/socket');
+const { uploadDocument } = require('../config/multer');
 
 router.use(authenticate);
 
@@ -26,7 +27,6 @@ router.get('/', authorize('admin', 'branch', 'user', 'user-panel'), async (req, 
 
     // Filters
     if (req.query.groupId) filter.groupId = req.query.groupId;
-    if (req.query.categoryId) filter.categoryId = req.query.categoryId;
     if (req.query.propertyType) filter.propertyType = req.query.propertyType;
     if (req.query.status) filter.status = req.query.status;
     if (req.query.showInSales !== undefined) filter.showInSales = req.query.showInSales === 'true';
@@ -37,7 +37,6 @@ router.get('/', authorize('admin', 'branch', 'user', 'user-panel'), async (req, 
         .populate('companyId', 'companyName')
         .populate('branchId', 'branchName branchCode')
         .populate('groupId', 'name')
-        .populate('categoryId', 'name')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -77,8 +76,7 @@ router.get('/:id', authorize('admin', 'branch', 'user', 'user-panel'), async (re
     const item = await Item.findOne(filter)
       .populate('companyId', 'companyName')
       .populate('branchId', 'branchName branchCode')
-      .populate('groupId', 'name')
-      .populate('categoryId', 'name');
+      .populate('groupId', 'name');
     
     if (!item) return errorResponse(res, 'Item not found', 404);
     successResponse(res, { item });
@@ -116,9 +114,7 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
       openingValue,
       showInSales,
       groupId,
-      categoryId,
       images,
-      documents,
       isActive
     } = req.body;
 
@@ -148,9 +144,7 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
       openingValue,
       showInSales,
       groupId,
-      categoryId,
       images,
-      documents,
       isActive: isActive !== undefined ? isActive : true,
       companyId: req.user.companyId,
       branchId: req.user.branchId || req.body.branchId
@@ -167,6 +161,62 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
     if (error.code === 11000) {
       return errorResponse(res, 'Item code already exists', 400);
     }
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Upload documents for item (multiple files allowed)
+router.post('/:id/documents', authorize('admin', 'branch', 'user'), uploadDocument.array('documents', 10), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
+    const item = await Item.findOne(filter);
+    
+    if (!item) return errorResponse(res, 'Item not found', 404);
+    
+    if (!req.files || req.files.length === 0) {
+      return errorResponse(res, 'No documents uploaded', 400);
+    }
+
+    const newDocuments = req.files.map(file => ({
+      filename: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      mimetype: file.mimetype,
+      size: file.size,
+      uploadedAt: new Date()
+    }));
+
+    item.documents.push(...newDocuments);
+    await item.save();
+
+    successResponse(res, { item, uploadedDocuments: newDocuments }, 'Documents uploaded successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Delete a document from item
+router.delete('/:id/documents/:documentId', authorize('admin', 'branch', 'user'), async (req, res) => {
+  try {
+    const fs = require('fs');
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
+    const item = await Item.findOne(filter);
+    
+    if (!item) return errorResponse(res, 'Item not found', 404);
+    
+    const document = item.documents.id(req.params.documentId);
+    if (!document) return errorResponse(res, 'Document not found', 404);
+    
+    // Delete file from disk
+    if (fs.existsSync(document.path)) {
+      fs.unlinkSync(document.path);
+    }
+    
+    item.documents.pull(req.params.documentId);
+    await item.save();
+
+    successResponse(res, { item }, 'Document deleted successfully');
+  } catch (error) {
     errorResponse(res, error.message, 500);
   }
 });
@@ -200,9 +250,7 @@ router.put('/:id', authorize('admin', 'branch', 'user'), async (req, res) => {
       openingValue,
       showInSales,
       groupId,
-      categoryId,
       images,
-      documents,
       isActive
     } = req.body;
 
@@ -235,9 +283,7 @@ router.put('/:id', authorize('admin', 'branch', 'user'), async (req, res) => {
         openingValue,
         showInSales,
         groupId,
-        categoryId,
         images,
-        documents,
         isActive
       },
       { new: true, runValidators: true }

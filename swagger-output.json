@@ -1444,11 +1444,6 @@
             "type": "string"
           },
           {
-            "name": "categoryId",
-            "in": "query",
-            "type": "string"
-          },
-          {
             "name": "propertyType",
             "in": "query",
             "type": "string"
@@ -1567,13 +1562,7 @@
                 "groupId": {
                   "example": "any"
                 },
-                "categoryId": {
-                  "example": "any"
-                },
                 "images": {
-                  "example": "any"
-                },
-                "documents": {
                   "example": "any"
                 },
                 "isActive": {
@@ -1724,13 +1713,7 @@
                 "groupId": {
                   "example": "any"
                 },
-                "categoryId": {
-                  "example": "any"
-                },
                 "images": {
-                  "example": "any"
-                },
-                "documents": {
                   "example": "any"
                 },
                 "isActive": {
@@ -1751,6 +1734,58 @@
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/items/{id}/documents": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/items/{id}/documents/{documentId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "documentId",
             "in": "path",
             "required": true,
             "type": "string"
