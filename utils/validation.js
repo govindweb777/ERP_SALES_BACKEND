@@ -503,22 +503,7 @@ const bankAccountSchema = Joi.object({
   isActive: Joi.boolean().default(true)
 });
 
-// Item Group Schema
-const itemGroupSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
-  description: Joi.string().max(500).allow(''),
-  shortName: Joi.string().max(20).required(),
-  isActive: Joi.boolean().default(true)
-});
-
-// Item Category Schema
-const itemCategorySchema = Joi.object({
-  name: Joi.string().min(2).max(100).required(),
-  description: Joi.string().max(500).allow(''),
-  isActive: Joi.boolean().default(true)
-});
-
-// Item Schema (Real Estate)
+// Item Schema (Real Estate) - groupId and categoryId removed
 const itemSchema = Joi.object({
   itemCode: Joi.string().max(50).required(),
   itemName: Joi.string().min(2).max(200).required(),
@@ -547,8 +532,6 @@ const itemSchema = Joi.object({
   bookingAmount: Joi.number().min(0).default(0),
   status: Joi.string().valid('Available', 'Booked', 'Sold', 'Under Construction', 'Ready to Move', 'Blocked').default('Available'),
   hsnCode: Joi.string().max(20).allow(''),
-  groupId: objectId.required(),
-  categoryId: objectId.required(),
   isActive: Joi.boolean().default(true)
 });
 
@@ -720,8 +703,6 @@ module.exports = {
   userPanelSchema,
   accountGroupSchema,
   bankAccountSchema,
-  itemGroupSchema,
-  itemCategorySchema,
   itemSchema,
   salesSchema,
   purchaseSchema,
@@ -735,8 +716,6 @@ module.exports = {
   accountGroupValidation: accountGroupSchema,
   chartOfAccountValidation: chartOfAccountSchema,
   bankAccountValidation: bankAccountSchema,
-  itemGroupValidation: itemGroupSchema,
-  itemCategoryValidation: itemCategorySchema,
   itemValidation: itemSchema,
   expenseValidation: expenseSchema,
   receiptValidation: receiptSchema,

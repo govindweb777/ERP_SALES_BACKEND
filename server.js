@@ -19,8 +19,8 @@ const chartOfAccountRoutes = require('./routes/chartOfAccounts');
 const accountGroupRoutes = require('./routes/accountGroups');
 const bankAccountRoutes = require('./routes/bankAccounts');
 const itemRoutes = require('./routes/items');
-// const salesRoutes = require('./routes/sales');
-// const purchaseRoutes = require('./routes/purchases');
+const salesRoutes = require('./routes/sales');
+const purchaseRoutes = require('./routes/purchases');
 // const expenseRoutes = require('./routes/expenses');
 // const receiptRoutes = require('./routes/receipts');
 // const paymentRoutes = require('./routes/payments');
@@ -29,8 +29,6 @@ const itemRoutes = require('./routes/items');
 // const reportRoutes = require('./routes/reports');
 
 
-// const itemGroupRoutes = require('./routes/itemGroups');
-// const itemCategoryRoutes = require('./routes/itemCategories');
 
 const app = express();
 const server = http.createServer(app);
@@ -95,8 +93,8 @@ app.use('/api/chart-of-accounts', chartOfAccountRoutes);
 app.use('/api/account-groups', accountGroupRoutes);
 app.use('/api/bank-accounts', bankAccountRoutes);
 app.use('/api/items', itemRoutes);
-// app.use('/api/sales', salesRoutes);
-// app.use('/api/purchases', purchaseRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/purchases', purchaseRoutes);
 // app.use('/api/expenses', expenseRoutes);
 // app.use('/api/receipts', receiptRoutes);
 // app.use('/api/payments', paymentRoutes);
@@ -104,9 +102,6 @@ app.use('/api/items', itemRoutes);
 // app.use('/api/journal-vouchers', journalVoucherRoutes);
 // app.use('/api/reports', reportRoutes);
 
-
-// app.use('/api/item-groups', itemGroupRoutes);
-// app.use('/api/item-categories', itemCategoryRoutes);
 
 // Health check
 app.get('/', (req, res) => {

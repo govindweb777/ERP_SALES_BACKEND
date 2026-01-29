@@ -26,7 +26,7 @@ router.get('/', authorize('admin', 'branch', 'user', 'user-panel'), async (req, 
     }
 
     // Filters
-    if (req.query.groupId) filter.groupId = req.query.groupId;
+    // groupId filter removed
     if (req.query.propertyType) filter.propertyType = req.query.propertyType;
     if (req.query.status) filter.status = req.query.status;
     if (req.query.showInSales !== undefined) filter.showInSales = req.query.showInSales === 'true';
@@ -36,7 +36,6 @@ router.get('/', authorize('admin', 'branch', 'user', 'user-panel'), async (req, 
       Item.find(filter)
         .populate('companyId', 'companyName')
         .populate('branchId', 'branchName branchCode')
-        .populate('groupId', 'name')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -75,8 +74,7 @@ router.get('/:id', authorize('admin', 'branch', 'user', 'user-panel'), async (re
     const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
     const item = await Item.findOne(filter)
       .populate('companyId', 'companyName')
-      .populate('branchId', 'branchName branchCode')
-      .populate('groupId', 'name');
+      .populate('branchId', 'branchName branchCode');
     
     if (!item) return errorResponse(res, 'Item not found', 404);
     successResponse(res, { item });
@@ -113,7 +111,6 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
       currentStock,
       openingValue,
       showInSales,
-      groupId,
       images,
       isActive
     } = req.body;
@@ -143,7 +140,6 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
       currentStock: currentStock || openingStock || 1,
       openingValue,
       showInSales,
-      groupId,
       images,
       isActive: isActive !== undefined ? isActive : true,
       companyId: req.user.companyId,
@@ -249,7 +245,6 @@ router.put('/:id', authorize('admin', 'branch', 'user'), async (req, res) => {
       currentStock,
       openingValue,
       showInSales,
-      groupId,
       images,
       isActive
     } = req.body;
@@ -282,7 +277,6 @@ router.put('/:id', authorize('admin', 'branch', 'user'), async (req, res) => {
         currentStock,
         openingValue,
         showInSales,
-        groupId,
         images,
         isActive
       },

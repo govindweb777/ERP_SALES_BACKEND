@@ -110,8 +110,6 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
           totalPrice: item.rate,
           openingStock: item.qty || 1,
           currentStock: item.qty || 1,
-          groupId: item.groupId,
-          categoryId: item.categoryId,
           companyId: req.user.companyId,
           branchId: req.user.branchId,
           status: 'Available'

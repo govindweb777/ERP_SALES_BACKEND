@@ -110,11 +110,7 @@ const itemSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  groupId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ItemGroup',
-    required: true
-  },
+  // Note: groupId and categoryId have been removed from this model
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
@@ -149,7 +145,8 @@ itemSchema.index({ companyId: 1, branchId: 1 });
 itemSchema.index({ itemCode: 1, companyId: 1, branchId: 1 }, { unique: true });
 itemSchema.index({ itemName: 'text', itemCode: 'text', projectName: 'text' });
 itemSchema.index({ hsnCode: 1 });
-itemSchema.index({ groupId: 1 });
+// Note: groupId index removed
+
 itemSchema.index({ isActive: 1 });
 itemSchema.index({ status: 1 });
 itemSchema.index({ propertyType: 1 });
