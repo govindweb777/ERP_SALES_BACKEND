@@ -6,7 +6,6 @@ const salesItemSchema = new mongoose.Schema({
     ref: 'Item',
     required: true 
   },
-  itemCode: { type: String, required: true },
   itemName: { type: String, required: true },
   propertyType: { type: String },
   projectName: { type: String },
@@ -147,7 +146,7 @@ salesSchema.index({ 'items.itemId': 1 });
 salesSchema.statics.generateInvoiceNo = async function(companyId, branchId) {
   const prefix = 'INV';
   const count = await this.countDocuments({ companyId, branchId });
-  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
 };
 
 module.exports = mongoose.model('Sales', salesSchema);

@@ -115,8 +115,11 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
       isActive
     } = req.body;
 
+    // Auto-generate itemCode if not provided
+    const finalItemCode = itemCode || await Item.generateItemCode(req.user.companyId, req.user.branchId);
+
     const item = await Item.create({
-      itemCode,
+      itemCode: finalItemCode,
       itemName,
       propertyType,
       projectName,
@@ -148,7 +151,7 @@ router.post('/', authorize('admin', 'branch', 'user'), async (req, res) => {
 
     sendNotification(req.user.companyId, req.user.branchId, NotificationTypes.ITEM_CREATED, {
       message: `New property "${itemName}" added`,
-      data: { _id: item._id, itemCode, itemName, propertyType },
+      data: { _id: item._id, itemCode: finalItemCode, itemName, propertyType },
       createdBy: req.user.name
     });
 

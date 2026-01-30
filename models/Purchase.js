@@ -6,7 +6,6 @@ const purchaseItemSchema = new mongoose.Schema({
     ref: 'Item',
     required: true 
   },
-  itemCode: { type: String, required: true },
   itemName: { type: String, required: true },
   propertyType: { type: String },
   projectName: { type: String },
@@ -157,7 +156,7 @@ purchaseSchema.index({ 'items.itemId': 1 });
 purchaseSchema.statics.generatePurchaseNo = async function(companyId, branchId) {
   const prefix = 'PUR';
   const count = await this.countDocuments({ companyId, branchId });
-  return `${prefix}${String(count + 1).padStart(6, '0')}`;
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
 };
 
 module.exports = mongoose.model('Purchase', purchaseSchema);

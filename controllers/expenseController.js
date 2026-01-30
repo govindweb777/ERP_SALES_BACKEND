@@ -4,11 +4,10 @@ const { getCompanyBranchFilter, getPaginationParams } = require('../utils/helper
 const { sendNotification, NotificationTypes } = require('../utils/socket');
 
 /**
- * GENERATE EXPENSE VOUCHER NUMBER
+ * GENERATE EXPENSE VOUCHER NUMBER (uses model static method)
  */
 const generateVoucherNo = async (companyId, branchId) => {
-  const count = await Expense.countDocuments({ companyId, branchId });
-  return `EXP${String(count + 1).padStart(5, '0')}`;
+  return Expense.generateVoucherNo(companyId, branchId);
 };
 
 /**

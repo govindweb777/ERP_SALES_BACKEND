@@ -159,4 +159,11 @@ journalVoucherSchema.index({ createdBy: 1 });
 journalVoucherSchema.index({ isActive: 1 });
 journalVoucherSchema.index({ isDeleted: 1 });
 
+// Auto-generate journal voucher number
+journalVoucherSchema.statics.generateJVNo = async function(companyId, branchId) {
+  const prefix = 'JV';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
+
 module.exports = mongoose.model('JournalVoucher', journalVoucherSchema);

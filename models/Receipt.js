@@ -215,4 +215,11 @@ receiptSchema.index({ createdBy: 1 });
 receiptSchema.index({ isActive: 1 });
 receiptSchema.index({ isDeleted: 1 });
 
+// Auto-generate receipt number
+receiptSchema.statics.generateReceiptNo = async function(companyId, branchId) {
+  const prefix = 'REC';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
+
 module.exports = mongoose.model('Receipt', receiptSchema);

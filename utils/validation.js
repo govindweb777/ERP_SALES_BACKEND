@@ -503,9 +503,9 @@ const bankAccountSchema = Joi.object({
   isActive: Joi.boolean().default(true)
 });
 
-// Item Schema (Real Estate) - groupId and categoryId removed
+// Item Schema (Real Estate) - groupId and categoryId removed, itemCode is auto-generated
 const itemSchema = Joi.object({
-  itemCode: Joi.string().max(50).required(),
+  itemCode: Joi.string().max(50).optional(), // Auto-generated if not provided
   itemName: Joi.string().min(2).max(200).required(),
   propertyType: Joi.string().valid('Plot', 'Flat', 'Shop', 'Office', 'Warehouse', 'Agricultural Land', 'Commercial', 'Residential', 'Industrial', 'Other').required(),
   projectName: Joi.string().max(200).allow(''),
@@ -535,18 +535,19 @@ const itemSchema = Joi.object({
   isActive: Joi.boolean().default(true)
 });
 
-// Sale Item Schema
+// Sale Item Schema - itemCode removed
 const saleItemSchema = Joi.object({
-  name: Joi.string().required(),
+  itemId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  itemName: Joi.string().required(),
   qty: Joi.number().min(0).required(),
   rate: Joi.number().min(0).required(),
   amount: Joi.number().min(0).required()
 });
 
-// Sales Schema
+// Sales Schema - invoiceNo is optional (auto-generated)
 const salesSchema = Joi.object({
   customerName: Joi.string().min(2).max(200).required(),
-  invoiceNo: Joi.string().max(50).required(),
+  invoiceNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
   items: Joi.array().items(saleItemSchema).min(1).required(),
   subTotal: Joi.number().min(0).required(),
@@ -556,10 +557,10 @@ const salesSchema = Joi.object({
   isActive: Joi.boolean().default(true)
 });
 
-// Purchase Schema
+// Purchase Schema - purchaseNo is optional (auto-generated)
 const purchaseSchema = Joi.object({
   vendorName: Joi.string().min(2).max(200).required(),
-  purchaseNo: Joi.string().max(50).required(),
+  purchaseNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
   gstin: gstin.optional(),
   items: Joi.array().items(saleItemSchema).min(1).required(),
@@ -570,80 +571,107 @@ const purchaseSchema = Joi.object({
   isActive: Joi.boolean().default(true)
 });
 
-// Expense Schema
+// Expense Schema - expenseNo/voucherNo is optional (auto-generated)
 const expenseSchema = Joi.object({
-  vendorName: Joi.string().min(2).max(200).required(),
-  expenseNo: Joi.string().max(50).required(),
+  vendorName: Joi.string().min(2).max(200).optional(),
+  vendorId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  voucherNo: Joi.string().max(50).optional(), // Auto-generated if not provided
+  expenseNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
-  description: Joi.string().max(500).required(),
-  amount: Joi.number().min(0).required(),
+  description: Joi.string().max(500).optional(),
+  amount: Joi.number().min(0).optional(),
   tax: Joi.number().min(0).default(0),
-  total: Joi.number().min(0).required(),
-  accountHead: Joi.string().required(),
+  total: Joi.number().min(0).optional(),
+  accountHead: Joi.string().optional(),
+  items: Joi.array().optional(),
   isActive: Joi.boolean().default(true)
 });
 
 // Outstanding Invoice Schema
 const outstandingInvoiceSchema = Joi.object({
-  invoiceNo: Joi.string().required(),
-  amount: Joi.number().min(0).required()
+  invoiceNo: Joi.string().optional(),
+  amount: Joi.number().min(0).optional()
 });
 
-// Receipt Schema
+// Receipt Schema - receiptNo is optional (auto-generated)
 const receiptSchema = Joi.object({
-  receiptNo: Joi.string().max(50).required(),
+  receiptNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
-  customerName: Joi.string().min(2).max(200).required(),
-  fromAccount: Joi.string().required(),
-  amount: Joi.number().min(0).required(),
+  accountId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  accountName: Joi.string().max(200).optional(),
+  customerName: Joi.string().min(2).max(200).optional(),
+  fromAccount: Joi.string().optional(),
+  amount: Joi.number().min(0).optional(),
+  amountReceived: Joi.number().min(0).optional(),
+  mode: Joi.string().valid('Cash', 'Cheque', 'Bank Transfer', 'UPI', 'Card', 'Online', 'Other').optional(),
+  depositTo: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   outstandingInvoices: Joi.array().items(outstandingInvoiceSchema).default([]),
   isActive: Joi.boolean().default(true)
 });
 
-// Payment Schema
+// Payment Schema - paymentNo is optional (auto-generated)
 const paymentSchema = Joi.object({
-  paymentNo: Joi.string().max(50).required(),
+  paymentNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
-  vendorName: Joi.string().min(2).max(200).required(),
-  toAccount: Joi.string().required(),
-  amount: Joi.number().min(0).required(),
+  accountId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  accountName: Joi.string().max(200).optional(),
+  vendorName: Joi.string().min(2).max(200).optional(),
+  toAccount: Joi.string().optional(),
+  amount: Joi.number().min(0).optional(),
+  amountPaid: Joi.number().min(0).optional(),
+  mode: Joi.string().valid('Cash', 'Cheque', 'Bank Transfer', 'UPI', 'Card', 'Online', 'Other').optional(),
+  paidFrom: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
   outstandingBills: Joi.array().items(Joi.object({
-    billNo: Joi.string().required(),
-    amount: Joi.number().min(0).required()
+    billNo: Joi.string().optional(),
+    amount: Joi.number().min(0).optional()
   })).default([]),
   isActive: Joi.boolean().default(true)
 });
 
-// Contra Entry Schema
+// Contra Entry Schema - voucherNo/contraNo is optional (auto-generated)
 const contraEntrySchema = Joi.object({
-  voucherNo: Joi.string().max(50).required(),
+  contraNo: Joi.string().max(50).optional(), // Auto-generated if not provided
+  voucherNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
-  fromAccount: Joi.string().required(),
-  toAccount: Joi.string().required(),
-  amount: Joi.number().min(0).required(),
+  fromAccount: Joi.string().optional(),
+  toAccount: Joi.string().optional(),
+  amount: Joi.number().min(0).optional(),
+  mode: Joi.string().valid('Cheque', 'Cash', 'Online', 'Bank Transfer', 'UPI', 'Other').optional(),
+  entries: Joi.array().optional(),
   narration: Joi.string().max(500).allow(''),
+  specialNotes: Joi.string().max(1000).allow(''),
   isActive: Joi.boolean().default(true)
 });
 
 // Journal Entry Schema
 const journalEntrySchema = Joi.object({
-  account: Joi.string().required(),
+  accountId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(),
+  accountName: Joi.string().optional(),
+  account: Joi.string().optional(),
+  description: Joi.string().max(500).allow(''),
   debit: Joi.number().min(0).default(0),
   credit: Joi.number().min(0).default(0)
 });
 
-// Journal Voucher Schema
+// Journal Voucher Schema - voucherNo/jvNo is optional (auto-generated)
 const journalVoucherSchema = Joi.object({
-  voucherNo: Joi.string().max(50).required(),
+  jvNo: Joi.string().max(50).optional(), // Auto-generated if not provided
+  voucherNo: Joi.string().max(50).optional(), // Auto-generated if not provided
   date: Joi.date().required(),
   entries: Joi.array().items(journalEntrySchema).min(2).required(),
   narration: Joi.string().max(500).allow(''),
-  totalDebit: Joi.number().min(0).required(),
-  totalCredit: Joi.number().min(0).required(),
+  specialNotes: Joi.string().max(1000).allow(''),
+  totalDebit: Joi.number().min(0).optional(),
+  totalCredit: Joi.number().min(0).optional(),
   isActive: Joi.boolean().default(true)
 }).custom((value, helpers) => {
-  if (value.totalDebit !== value.totalCredit) {
-    return helpers.error('any.custom', { message: 'Total debit must equal total credit' });
+  // Auto-calculate totals if entries provided
+  if (value.entries && value.entries.length > 0) {
+    const totalDebit = value.entries.reduce((sum, e) => sum + (e.debit || 0), 0);
+    const totalCredit = value.entries.reduce((sum, e) => sum + (e.credit || 0), 0);
+    if (totalDebit !== totalCredit) {
+      return helpers.error('any.custom', { message: 'Total debit must equal total credit' });
+    }
   }
   return value;
 });

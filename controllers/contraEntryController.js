@@ -4,11 +4,10 @@ const { getCompanyBranchFilter, getPaginationParams } = require('../utils/helper
 const { sendNotification, NotificationTypes } = require('../utils/socket');
 
 /**
- * GENERATE CONTRA NUMBER
+ * GENERATE CONTRA NUMBER (uses model static method)
  */
 const generateContraNo = async (companyId, branchId) => {
-  const count = await ContraEntry.countDocuments({ companyId, branchId });
-  return `CTR${String(count + 1).padStart(5, '0')}`;
+  return ContraEntry.generateContraNo(companyId, branchId);
 };
 
 /**

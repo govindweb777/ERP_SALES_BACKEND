@@ -201,4 +201,11 @@ expenseSchema.index({ createdBy: 1 });
 expenseSchema.index({ isActive: 1 });
 expenseSchema.index({ isDeleted: 1 });
 
+// Auto-generate expense voucher number
+expenseSchema.statics.generateVoucherNo = async function(companyId, branchId) {
+  const prefix = 'EXP';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
+
 module.exports = mongoose.model('Expense', expenseSchema);

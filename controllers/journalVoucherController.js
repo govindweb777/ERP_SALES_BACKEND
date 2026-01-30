@@ -4,11 +4,10 @@ const { getCompanyBranchFilter, getPaginationParams } = require('../utils/helper
 const { sendNotification, NotificationTypes } = require('../utils/socket');
 
 /**
- * GENERATE JV NUMBER
+ * GENERATE JV NUMBER (uses model static method)
  */
 const generateJVNo = async (companyId, branchId) => {
-  const count = await JournalVoucher.countDocuments({ companyId, branchId });
-  return `JV${String(count + 1).padStart(5, '0')}`;
+  return JournalVoucher.generateJVNo(companyId, branchId);
 };
 
 /**

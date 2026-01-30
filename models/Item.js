@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const itemSchema = new mongoose.Schema({
   itemCode: {
     type: String,
-    required: [true, 'Item code is required'],
     trim: true,
     maxlength: 50
   },
@@ -142,7 +141,7 @@ const itemSchema = new mongoose.Schema({
 
 // Indexes
 itemSchema.index({ companyId: 1, branchId: 1 });
-itemSchema.index({ itemCode: 1, companyId: 1, branchId: 1 }, { unique: true });
+itemSchema.index({ itemCode: 1, companyId: 1, branchId: 1 }, { unique: true, sparse: true });
 itemSchema.index({ itemName: 'text', itemCode: 'text', projectName: 'text' });
 itemSchema.index({ hsnCode: 1 });
 // Note: groupId index removed
@@ -151,5 +150,12 @@ itemSchema.index({ isActive: 1 });
 itemSchema.index({ status: 1 });
 itemSchema.index({ propertyType: 1 });
 itemSchema.index({ 'location.city': 1 });
+
+// Auto-generate item code
+itemSchema.statics.generateItemCode = async function(companyId, branchId) {
+  const prefix = 'IT';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
 
 module.exports = mongoose.model('Item', itemSchema);

@@ -174,4 +174,11 @@ contraEntrySchema.index({ createdBy: 1 });
 contraEntrySchema.index({ isActive: 1 });
 contraEntrySchema.index({ isDeleted: 1 });
 
+// Auto-generate contra number
+contraEntrySchema.statics.generateContraNo = async function(companyId, branchId) {
+  const prefix = 'CE';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
+
 module.exports = mongoose.model('ContraEntry', contraEntrySchema);

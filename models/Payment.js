@@ -191,4 +191,11 @@ paymentSchema.index({ createdBy: 1 });
 paymentSchema.index({ isActive: 1 });
 paymentSchema.index({ isDeleted: 1 });
 
+// Auto-generate payment number
+paymentSchema.statics.generatePaymentNo = async function(companyId, branchId) {
+  const prefix = 'PAY';
+  const count = await this.countDocuments({ companyId, branchId });
+  return `${prefix}${String(count + 1).padStart(5, '0')}`;
+};
+
 module.exports = mongoose.model('Payment', paymentSchema);

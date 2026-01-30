@@ -4,11 +4,10 @@ const { getCompanyBranchFilter, getPaginationParams } = require('../utils/helper
 const { sendNotification, NotificationTypes } = require('../utils/socket');
 
 /**
- * GENERATE RECEIPT NUMBER
+ * GENERATE RECEIPT NUMBER (uses model static method)
  */
 const generateReceiptNo = async (companyId, branchId) => {
-  const count = await Receipt.countDocuments({ companyId, branchId });
-  return `RCP${String(count + 1).padStart(5, '0')}`;
+  return Receipt.generateReceiptNo(companyId, branchId);
 };
 
 /**

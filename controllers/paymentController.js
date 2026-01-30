@@ -4,11 +4,10 @@ const { getCompanyBranchFilter, getPaginationParams } = require('../utils/helper
 const { sendNotification, NotificationTypes } = require('../utils/socket');
 
 /**
- * GENERATE PAYMENT NUMBER
+ * GENERATE PAYMENT NUMBER (uses model static method)
  */
 const generatePaymentNo = async (companyId, branchId) => {
-  const count = await Payment.countDocuments({ companyId, branchId });
-  return `P${String(count + 1).padStart(5, '0')}`;
+  return Payment.generatePaymentNo(companyId, branchId);
 };
 
 /**
