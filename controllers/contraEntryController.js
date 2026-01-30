@@ -278,6 +278,81 @@ exports.toggleStatus = async (req, res) => {
 };
 
 /**
+ * HARD DELETE CONTRA ENTRY (Permanent)
+ */
+exports.hardDelete = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user) 
+    };
+    
+    const contraEntry = await ContraEntry.findOneAndDelete(filter);
+    
+    if (!contraEntry) {
+      return errorResponse(res, 'Contra entry not found', 404);
+    }
+    
+    return successResponse(res, null, 'Contra entry permanently deleted');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * RESTORE SOFT DELETED CONTRA ENTRY
+ */
+exports.restore = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user),
+      isDeleted: true 
+    };
+    
+    const contraEntry = await ContraEntry.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!contraEntry) {
+      return errorResponse(res, 'Contra entry not found or not deleted', 404);
+    }
+    
+    return successResponse(res, { contraEntry }, 'Contra entry restored successfully');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * GET SOFT DELETED CONTRA ENTRIES
+ */
+exports.getDeleted = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPaginationParams(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+
+    const [data, total] = await Promise.all([
+      ContraEntry.find(filter)
+        .populate('entries.accountId', 'accountName bankName')
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      ContraEntry.countDocuments(filter)
+    ]);
+
+    return paginatedResponse(res, data, total, page, limit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
  * GET NEXT CONTRA NUMBER
  */
 exports.getNextContraNo = async (req, res) => {

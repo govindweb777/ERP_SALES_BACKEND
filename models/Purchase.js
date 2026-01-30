@@ -137,6 +137,10 @@ const purchaseSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -149,6 +153,7 @@ purchaseSchema.index({ date: -1 });
 purchaseSchema.index({ vendorName: 'text', purchaseNo: 'text' });
 purchaseSchema.index({ createdBy: 1 });
 purchaseSchema.index({ isActive: 1 });
+purchaseSchema.index({ isDeleted: 1 });
 purchaseSchema.index({ paymentStatus: 1 });
 purchaseSchema.index({ 'items.itemId': 1 });
 

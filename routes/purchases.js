@@ -298,7 +298,64 @@ router.patch('/:id/payment', authorize('admin', 'branch', 'user'), async (req, r
   }
 });
 
-// Delete purchase
+// Soft delete purchase (sets isDeleted to true)
+router.delete('/soft-delete/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
+    const purchase = await Purchase.findOneAndUpdate(
+      filter,
+      { isDeleted: true, isActive: false },
+      { new: true }
+    );
+    
+    if (!purchase) return errorResponse(res, 'Purchase not found', 404);
+    successResponse(res, { purchase }, 'Purchase soft deleted successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Restore soft deleted purchase
+router.patch('/restore/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user), isDeleted: true };
+    const purchase = await Purchase.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!purchase) return errorResponse(res, 'Purchase not found or not deleted', 404);
+    successResponse(res, { purchase }, 'Purchase restored successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Get soft deleted purchases
+router.get('/deleted/list', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+    
+    const [data, total] = await Promise.all([
+      Purchase.find(filter)
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      Purchase.countDocuments(filter)
+    ]);
+
+    paginatedResponse(res, data, buildPaginationResponse(total, page, limit));
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Delete purchase (hard delete)
 router.delete('/:id', authorize('admin', 'branch'), async (req, res) => {
   try {
     const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };

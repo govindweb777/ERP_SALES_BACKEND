@@ -286,6 +286,81 @@ exports.toggleStatus = async (req, res) => {
 };
 
 /**
+ * HARD DELETE JOURNAL VOUCHER (Permanent)
+ */
+exports.hardDelete = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user) 
+    };
+    
+    const journalVoucher = await JournalVoucher.findOneAndDelete(filter);
+    
+    if (!journalVoucher) {
+      return errorResponse(res, 'Journal voucher not found', 404);
+    }
+    
+    return successResponse(res, null, 'Journal voucher permanently deleted');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * RESTORE SOFT DELETED JOURNAL VOUCHER
+ */
+exports.restore = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user),
+      isDeleted: true 
+    };
+    
+    const journalVoucher = await JournalVoucher.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!journalVoucher) {
+      return errorResponse(res, 'Journal voucher not found or not deleted', 404);
+    }
+    
+    return successResponse(res, { journalVoucher }, 'Journal voucher restored successfully');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * GET SOFT DELETED JOURNAL VOUCHERS
+ */
+exports.getDeleted = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPaginationParams(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+
+    const [data, total] = await Promise.all([
+      JournalVoucher.find(filter)
+        .populate('entries.accountId', 'name groupType')
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      JournalVoucher.countDocuments(filter)
+    ]);
+
+    return paginatedResponse(res, data, total, page, limit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
  * GET NEXT JV NUMBER
  */
 exports.getNextJVNo = async (req, res) => {

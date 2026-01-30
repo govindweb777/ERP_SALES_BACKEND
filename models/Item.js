@@ -134,6 +134,10 @@ const itemSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -147,6 +151,7 @@ itemSchema.index({ hsnCode: 1 });
 // Note: groupId index removed
 
 itemSchema.index({ isActive: 1 });
+itemSchema.index({ isDeleted: 1 });
 itemSchema.index({ status: 1 });
 itemSchema.index({ propertyType: 1 });
 itemSchema.index({ 'location.city': 1 });

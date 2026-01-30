@@ -299,6 +299,82 @@ exports.toggleStatus = async (req, res) => {
 };
 
 /**
+ * HARD DELETE PAYMENT (Permanent)
+ */
+exports.hardDelete = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user) 
+    };
+    
+    const payment = await Payment.findOneAndDelete(filter);
+    
+    if (!payment) {
+      return errorResponse(res, 'Payment not found', 404);
+    }
+    
+    return successResponse(res, null, 'Payment permanently deleted');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * RESTORE SOFT DELETED PAYMENT
+ */
+exports.restore = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user),
+      isDeleted: true 
+    };
+    
+    const payment = await Payment.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!payment) {
+      return errorResponse(res, 'Payment not found or not deleted', 404);
+    }
+    
+    return successResponse(res, { payment }, 'Payment restored successfully');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * GET SOFT DELETED PAYMENTS
+ */
+exports.getDeleted = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPaginationParams(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+
+    const [data, total] = await Promise.all([
+      Payment.find(filter)
+        .populate('accountId', 'groupName')
+        .populate('paidFrom', 'accountName bankName')
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      Payment.countDocuments(filter)
+    ]);
+
+    return paginatedResponse(res, data, total, page, limit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
  * GET NEXT PAYMENT NUMBER
  */
 exports.getNextPaymentNo = async (req, res) => {

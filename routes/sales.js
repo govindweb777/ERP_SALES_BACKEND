@@ -287,7 +287,64 @@ router.patch('/:id/payment', authorize('admin', 'branch', 'user'), async (req, r
   }
 });
 
-// Delete sale
+// Soft delete sale (sets isDeleted to true)
+router.delete('/soft-delete/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
+    const sale = await Sales.findOneAndUpdate(
+      filter,
+      { isDeleted: true, isActive: false },
+      { new: true }
+    );
+    
+    if (!sale) return errorResponse(res, 'Sale not found', 404);
+    successResponse(res, { sale }, 'Sale soft deleted successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Restore soft deleted sale
+router.patch('/restore/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user), isDeleted: true };
+    const sale = await Sales.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!sale) return errorResponse(res, 'Sale not found or not deleted', 404);
+    successResponse(res, { sale }, 'Sale restored successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Get soft deleted sales
+router.get('/deleted/list', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+    
+    const [data, total] = await Promise.all([
+      Sales.find(filter)
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      Sales.countDocuments(filter)
+    ]);
+
+    paginatedResponse(res, data, buildPaginationResponse(total, page, limit));
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Delete sale (hard delete)
 router.delete('/:id', authorize('admin', 'branch'), async (req, res) => {
   try {
     const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };

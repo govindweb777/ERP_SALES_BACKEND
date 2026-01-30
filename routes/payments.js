@@ -14,9 +14,20 @@ router.get('/', authorize('admin', 'branch', 'user', 'user-panel'), controller.g
 router.get('/:id', authorize('admin', 'branch', 'user', 'user-panel'), controller.getOne);
 router.post('/', authorize('admin', 'branch', 'user'), controller.create);
 router.put('/:id', authorize('admin', 'branch', 'user'), controller.update);
-router.delete('/:id', authorize('admin', 'branch'), controller.delete);
+
+// Soft delete (sets isDeleted to true) - using /soft-delete/:id pattern
+router.delete('/soft-delete/:id', authorize('admin', 'branch'), controller.delete);
+
+// Hard delete (permanent)
+router.delete('/:id', authorize('admin', 'branch'), controller.hardDelete);
 
 // Toggle status
 router.patch('/:id/toggle-status', authorize('admin', 'branch'), controller.toggleStatus);
+
+// Restore soft deleted payment
+router.patch('/restore/:id', authorize('admin', 'branch'), controller.restore);
+
+// Get soft deleted payments
+router.get('/deleted/list', authorize('admin', 'branch'), controller.getDeleted);
 
 module.exports = router;

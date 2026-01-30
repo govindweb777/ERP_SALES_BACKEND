@@ -127,6 +127,10 @@ const salesSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -139,6 +143,7 @@ salesSchema.index({ date: -1 });
 salesSchema.index({ customerName: 'text', invoiceNo: 'text' });
 salesSchema.index({ createdBy: 1 });
 salesSchema.index({ isActive: 1 });
+salesSchema.index({ isDeleted: 1 });
 salesSchema.index({ paymentStatus: 1 });
 salesSchema.index({ 'items.itemId': 1 });
 

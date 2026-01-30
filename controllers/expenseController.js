@@ -311,6 +311,81 @@ exports.toggleStatus = async (req, res) => {
 };
 
 /**
+ * HARD DELETE EXPENSE (Permanent)
+ */
+exports.hardDelete = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user) 
+    };
+    
+    const expense = await Expense.findOneAndDelete(filter);
+    
+    if (!expense) {
+      return errorResponse(res, 'Expense not found', 404);
+    }
+    
+    return successResponse(res, null, 'Expense permanently deleted');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * RESTORE SOFT DELETED EXPENSE
+ */
+exports.restore = async (req, res) => {
+  try {
+    const filter = { 
+      _id: req.params.id, 
+      ...getCompanyBranchFilter(req.user),
+      isDeleted: true 
+    };
+    
+    const expense = await Expense.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!expense) {
+      return errorResponse(res, 'Expense not found or not deleted', 404);
+    }
+    
+    return successResponse(res, { expense }, 'Expense restored successfully');
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
+ * GET SOFT DELETED EXPENSES
+ */
+exports.getDeleted = async (req, res) => {
+  try {
+    const { page, limit, skip } = getPaginationParams(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+
+    const [data, total] = await Promise.all([
+      Expense.find(filter)
+        .populate('vendorId', 'groupName')
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .populate('createdBy', 'name email')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      Expense.countDocuments(filter)
+    ]);
+
+    return paginatedResponse(res, data, total, page, limit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+/**
  * GET NEXT VOUCHER NUMBER
  */
 exports.getNextVoucherNo = async (req, res) => {

@@ -332,7 +332,63 @@ router.patch('/:id/toggle-active', authorize('admin', 'branch'), async (req, res
   }
 });
 
-// Delete item
+// Soft delete item (sets isDeleted to true)
+router.delete('/soft-delete/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
+    const item = await Item.findOneAndUpdate(
+      filter,
+      { isDeleted: true, isActive: false },
+      { new: true }
+    );
+    
+    if (!item) return errorResponse(res, 'Item not found', 404);
+    successResponse(res, { item }, 'Item soft deleted successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Restore soft deleted item
+router.patch('/restore/:id', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user), isDeleted: true };
+    const item = await Item.findOneAndUpdate(
+      filter,
+      { isDeleted: false, isActive: true },
+      { new: true }
+    );
+    
+    if (!item) return errorResponse(res, 'Item not found or not deleted', 404);
+    successResponse(res, { item }, 'Item restored successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Get soft deleted items
+router.get('/deleted/list', authorize('admin', 'branch'), async (req, res) => {
+  try {
+    const { page, limit, skip } = getPagination(req.query);
+    const filter = { ...getCompanyBranchFilter(req.user), isDeleted: true };
+    
+    const [data, total] = await Promise.all([
+      Item.find(filter)
+        .populate('companyId', 'companyName')
+        .populate('branchId', 'branchName branchCode')
+        .skip(skip)
+        .limit(limit)
+        .sort({ updatedAt: -1 }),
+      Item.countDocuments(filter)
+    ]);
+
+    paginatedResponse(res, data, buildPaginationResponse(total, page, limit));
+  } catch (error) {
+    errorResponse(res, error.message, 500);
+  }
+});
+
+// Delete item (hard delete)
 router.delete('/:id', authorize('admin', 'branch'), async (req, res) => {
   try {
     const filter = { _id: req.params.id, ...getCompanyBranchFilter(req.user) };
