@@ -23,10 +23,10 @@ const salesRoutes = require('./routes/sales');
 const purchaseRoutes = require('./routes/purchases');
 const expenseRoutes = require('./routes/expenses');
 const receiptRoutes = require('./routes/receipts');
-// const paymentRoutes = require('./routes/payments');
-// const contraEntryRoutes = require('./routes/contraEntries');
-// const journalVoucherRoutes = require('./routes/journalVouchers');
-// const reportRoutes = require('./routes/reports');
+const paymentRoutes = require('./routes/payments');
+const contraEntryRoutes = require('./routes/contraEntries');
+const journalVoucherRoutes = require('./routes/journalVouchers');
+const reportRoutes = require('./routes/reports');
 
 
 
@@ -97,10 +97,10 @@ app.use('/api/sales', salesRoutes);
 app.use('/api/purchases', purchaseRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/receipts', receiptRoutes);
-// app.use('/api/payments', paymentRoutes);
-// app.use('/api/contra-entries', contraEntryRoutes);
-// app.use('/api/journal-vouchers', journalVoucherRoutes);
-// app.use('/api/reports', reportRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/contra-entries', contraEntryRoutes);
+app.use('/api/journal-vouchers', journalVoucherRoutes);
+app.use('/api/reports', reportRoutes);
 
 
 // Health check
